@@ -15,6 +15,8 @@ from settings import Args
 from collections import defaultdict
 import time
 import iteround
+from contextlib import nullcontext
+from utils.inference_utils import sample_chunk_size, collect_sample_chunks
 
 ps = Chem.SmilesParserParams()
 ps.removeHs = False
@@ -69,8 +71,7 @@ def split_number(number, num_parts):
     return [number // num_parts] * num_parts
 
 start = time.time()
-def predict_batch(args, batch_idx, data_batch, model, flow, split, rand_matrix=None):
-    src_data_indices = data_batch.src_data_indices
+def predict_batch(args, batch_idx, data_batch, model, flow):
     y = data_batch.src_token_ids
     y_len = data_batch.src_lens
     x0 = data_batch.src_matrices
@@ -79,16 +80,15 @@ def predict_batch(args, batch_idx, data_batch, model, flow, split, rand_matrix=N
 
     batch_size, n, n = x0.shape
     
-    log_rank_0(f"Batch idx: {batch_idx}, batch_shape {batch_size, n, n} {(time.time() - start): .2f}s")
-    # --------ODE inference--------------#
-    SAMPLE_BATCH = args.sample_size
-    # split_sample_batches = split_number(SAMPLE_BATCH, 2) if n >= 400 else split_number(SAMPLE_BATCH, 1)
-    # split_sample_batches = split_number(SAMPLE_BATCH, 1)
-    split_sample_batches = split_number(SAMPLE_BATCH, split)
-    
-    big_traj_list = []
-    for sample_size in split_sample_batches:
-        src_data_indices = src_data_indices.repeat_interleave(sample_size, dim=0)
+    chunk_size = sample_chunk_size(
+        batch_size, n, args.sample_size,
+        max_matrix_elements=int(os.environ.get("MAX_SAMPLE_MATRIX_ELEMENTS", "4000000")),
+        max_samples=int(os.environ.get("SAMPLE_CHUNK_SIZE", str(args.sample_size))),
+    )
+    log_rank_0(f"Batch idx: {batch_idx}, batch_shape {batch_size, n, n}, "
+               f"sample_chunk {chunk_size}/{args.sample_size} {(time.time() - start): .2f}s")
+
+    def run_chunk(sample_size):
         x0_repeated = x0.repeat_interleave(sample_size, dim=0)
         x0_sample_repeated = flow.sample_be_matrix(x0_repeated)
 
@@ -110,7 +110,16 @@ def predict_batch(args, batch_idx, data_batch, model, flow, split, rand_matrix=N
             method="dopri5",
             adjoint_params=()
         )
-        big_traj_list.append((traj_list.transpose(0, 1).detach().cpu(), sample_size))
+        # Returning only CPU tensors releases this chunk's GPU temporaries.
+        return traj_list.transpose(0, 1).detach().cpu()
+
+    big_traj_list = collect_sample_chunks(
+        args.sample_size, chunk_size, run_chunk, torch.OutOfMemoryError,
+        torch.cuda.empty_cache,
+        lambda old, new: log_rank_0(
+            f"CUDA OOM in batch {batch_idx}; retrying sample chunk {old} -> {new}; "
+            f"retaining {args.sample_size} total samples per reaction"),
+    )
 
     # merging
     all_traj_list = []
@@ -141,11 +150,7 @@ def get_predictions(args, model, flow, data_loader, iter_count=np.inf, write_o=N
             tgt_smiles_list = data_batch.tgt_smiles_list
 
 
-            # if (batch_size*n*n) <= 5*360*360:
-            if (batch_size*n*n) <= 15*130*130:
-                traj_list = predict_batch(args, batch_idx, data_batch, model, flow, 1)
-            else:
-                traj_list = predict_batch(args, batch_idx, data_batch, model, flow, 2)
+            traj_list = predict_batch(args, batch_idx, data_batch, model, flow)
 
             if torch.distributed.is_initialized() and dist.get_world_size() > 1:
                 gathered_results = [None for _ in range(dist.get_world_size())]
@@ -310,7 +315,11 @@ def main(args):
                                 batch_size=args.test_batch_size,
                                 shuffle=False, epoch=None, use_sort=False)
 
-        with open(results_path, file_mod) as result_o:
+        # Finish reading resume offsets on every rank before opening the writer.
+        dist.barrier()
+        # Only rank zero writes predictions; other ranks must not truncate them.
+        writer = open(results_path, file_mod) if dist.get_rank() == 0 else nullcontext(None)
+        with writer as result_o:
             metrics = get_predictions(args, attn_model, flow, test_loader, write_o=result_o)
         if dist.get_rank() == 0:
             metrics = np.array(metrics)

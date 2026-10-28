@@ -10,3 +10,5 @@ results
 pyrightconfig.toml
 
 old/*
+.venv*/
+.vast/

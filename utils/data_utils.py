@@ -265,7 +265,8 @@ class ReactionDataset(Dataset):
 
     def parse_data_parallel(self):
 
-        p = Pool(cpu_count())
+        # Respect the worker allocation on shared GPU hosts (per GPU process).
+        p = Pool(max(1, min(cpu_count(), self.args.num_workers)))
         results = p.imap(process_smiles, self.smiles_list)
 
         # Consume results before closing pool to avoid deadlock:
@@ -321,7 +322,10 @@ class ReactionDataset(Dataset):
                         (max_batch_src_len + max_batch_tgt_len) * (sample_size + 1) <= batch_size:
                     sample_size += 1
                 else:
-                    self.batch_sizes.append(sample_size)
+                    # A single large reaction may exceed the token budget. Give
+                    # it its own batch, without inserting an empty first batch.
+                    if sample_size:
+                        self.batch_sizes.append(sample_size)
 
                     sample_size = 1
                     max_batch_src_len = src_len
