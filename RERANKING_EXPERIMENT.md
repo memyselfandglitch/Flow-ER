@@ -8,6 +8,8 @@ Artifacts: [new validation experiment](results/reranking/learned-residual-valida
 
 **Completed:** all 206 fresh fits converged, and the final model is frozen. Nested grouped validation accuracy changed from 85.076% to 85.269% (+0.193 percentage points; 95% interval −0.076 to +0.458), with 691 corrections, 649 new errors and 369 wrong-to-wrong switches. This is development evidence and does not establish the provisional one-point improvement. See the [report](results/reranking/learned-residual-validation-20261031/REPORT.md) and [review](results/reranking/learned-residual-validation-20261031/DEVELOPMENT_REVIEW.md). No GPU or cloud spending was used for this experiment.
 
+**Learning curve completed:** 55 fresh copies at 25%, 50% and 100% of whole fitting groups, under fixed fold-specific policies and identical held-out groups, scored 85.236%, 85.278% and 85.269%. The 50% → 100% paired change was −0.009 points (95% interval −0.138 to +0.123). The original model is preserved. [Learning-curve interpretation](results/reranking/learned-residual-learning-curve-20261031/INTERPRETATION.md) documents the flat curve, tuning-provenance limits, and the 589 corrections offset by 589 new errors among inputs with multiple recorded validation outcomes. No additional generation is justified by this data-size check alone; execution holds remain in place.
+
 ## Historical follow-up: all validation, random 20k test (2026-10-29)
 
 The user requested a new reranker trained from scratch on the complete official

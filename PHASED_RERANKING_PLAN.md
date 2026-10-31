@@ -6,6 +6,8 @@ Validation-only artifacts: [learned residual validation experiment](results/rera
 
 [Development report](results/reranking/learned-residual-validation-20261031/REPORT.md): nested grouped accuracy 85.076% → 85.269%, 691 corrections and 649 new errors, paired gain +0.193 points (95% group-bootstrap interval −0.076 to +0.458). This does not establish a positive effect or meet the provisional one-point goal. [Interpretation and verification](results/reranking/learned-residual-validation-20261031/DEVELOPMENT_REVIEW.md) separates this development result from the still-pending reserved test. All 206 fits converged from zero initialization; all 21,723 saved out-of-fold decisions reproduced after checkpoint reload.
 
+**Learning-curve follow-up completed:** the user authorized separate 25%, 50% and 100% fitting-group copies on the same held-out groups. With five fixed subset seeds and the existing fold-specific settings, all 55 fresh fits converged. Held-out accuracy was 85.236%, 85.278% and 85.269%; doubling 50% → 100% changed accuracy by −0.009 points (95% paired interval −0.138 to +0.123). The current curve is essentially flat. [Results and post-hoc diagnosis](results/reranking/learned-residual-learning-curve-20261031/INTERPRETATION.md) favor examining features/model behavior and label ambiguity before more generation. This is conditional on historical tuning inside each full fitting partition, not a total-label-budget curve. The original frozen model remains unchanged, and all other execution holds persist.
+
 ```bash
 .venv-analysis/bin/python -m unittest discover -s tests -p test_learned_residual.py
 .venv-analysis/bin/python -m unittest discover -s tests -p test_phased_reranking.py
