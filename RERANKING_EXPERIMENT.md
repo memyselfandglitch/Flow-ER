@@ -4,8 +4,8 @@
 
 - Origin skill: academic-research-suite / experiment-agent
 - Date: 2026-10-27
-- Stage: complete prefix diagnosis and exploratory failure-learning assessment
-- Status: full inference preserved and paused; no reliable reranking benefit established
+- Stage: label ambiguity audit and 50-case stratified chemical review
+- Status: label audit and stratified review complete; full benchmark preserved and paused
 
 ## Revised scope (2026-10-28)
 
@@ -21,15 +21,71 @@ The user replaced the previous finish-inference-first plan:
    final reproduction result is needed.
 
 Preservation is complete: `results/paused-20261028/` has 57 checksum-verified
-files. The H100 is stopped with storage retained. The prefix has 20,152 rows,
+files. The H100 is stopped with its preserved backup verified. The prefix has 20,152 rows,
 each with 64 samples; 198,845 benchmark rows remain.
 
-**Current requested scope is next-step failure diagnosis and learning.** In the current inference, top K
+**The label audit and stratified review use cached predictions.** In the current inference, top K
 means K distinct next-state candidates ranked by sampling frequency for a supplied
 elementary-step input. It is not K consecutive correct steps and not K complete
-pathways rolled out from initial reactants. The latest request specifically asks
-to isolate all top-1-wrong/top-10-correct cases and learn from their failures.
-That work used cached predictions locally; no pilot GPU inference was launched.
+pathways rolled out from initial reactants. The failure-learning pilot was followed
+by the user's request to examine whether competing labels explain the apparent
+ranking errors. Both studies used cached predictions locally.
+
+## Completed stratified review (2026-10-29)
+
+See the [50-case report](results/stratified-review-50/REPORT.md),
+[illustrated case browser](results/stratified-review-50/review.html), and
+[frozen selection](results/stratified-review-50/selection.json).
+
+- Fifty cases from fifty networks were selected from the 435 unmatched errors:
+  24 connectivity differences, 16 H/charge differences, nine other
+  bond-order/H/charge differences and the one empty candidate set.
+- Thirty-one references are within top 10, two are rank 11 and 17 are absent
+  from all saved samples. Deliberate stratification means these rates must not
+  be extrapolated to the population.
+- Eleven reviews identify specific input/candidate hypotheses worth testing;
+  20 have the reference available but no reliable selector established; 19
+  cannot be resolved from the saved top 10. No fixes or accuracy gain are claimed.
+- A post hoc cached-control audit found five top-1 cases with a carbon having
+  more than four explicit neighbors and 18 with paired carbon +2/aluminium −2.
+  Neither flag appeared in baseline-correct predictions or recorded references.
+  Only six flagged rows have the reference within top 10, so their maximum
+  oracle headroom is 0.030 percentage points on this prefix.
+- Boron cases also expose the evaluator's broad conserved-matrix exception
+  bucket. Exact conversion causes were not retained in the original logs.
+- No new GPU inference, model fitting, energy computation or untouched-target
+  inspection. Further development requires independent train/validation data,
+  baseline-correct controls and a frozen held-out comparison.
+
+## Completed label/evaluation audit (2026-10-28)
+
+See [audit report](results/label-audit-20152/REPORT.md),
+[case browser](results/label-audit-20152/cases.html), and
+[435 unmatched predictions](results/label-audit-20152/unmatched-top1.jsonl).
+
+- Numeric IDs group potentially branching reaction networks, not unique linear
+  pathways. Earlier “same pathway” wording should mean “same network ID.”
+- Across all 2,834 strict top-1 misses, 2,399 match another recorded target for
+  the same normalized input. The earlier 2,381 statistic covered only the
+  top-10-hit subset. There are 2,388 exact model-input witness matches overall.
+- Strict top-1 accuracy remains 85.94%. Retrospective agreement with any observed
+  target for the same input is 97.84%; that diagnostic is not new model accuracy
+  or independent confirmation of chemical validity.
+- Inputs with one observed target score 97.95% strict top 1; inputs with multiple
+  observed targets score 41.46% strict versus 97.46% agreement with any recorded
+  target. These cohorts are defined by inspected labels.
+- Of 2,399 competing cases, 1,507 share the unique-largest organic fragment
+  (proxy available for 2,294). There are 189 unmapped RDKit resonance-related
+  comparisons, including three with mapped-H relocation caveats.
+- Of 435 unmatched predictions, 343 have the target within top 10 and 92 do not.
+  Their chemical validity and reference-label validity remain to be adjudicated.
+- This ordered prefix covers only numeric-ID rows; other source tags occur later.
+  The full test set is unnecessary for diagnosing the observed ambiguity.
+  Broader prespecified sampling is needed before generalizing rates.
+
+No new GPU inference ran. The proposed larger reranker experiment is on hold.
+The reserved 512 confirmation cases remain unprocessed; no unprocessed test
+target labels were used by the audit.
 
 ## Completed failure-learning study (2026-10-28)
 
@@ -39,7 +95,7 @@ See [full report](results/reranking/failure-study/REPORT.md),
 
 - All 20,152 completed rows were audited without dropping unsupported candidates.
 - In 2,381 of 2,724 recoverable failures (87.4%), top 1 is another recorded
-  target for the same normalized input; 2,370 also share its pathway ID.
+  target for the same normalized input; 2,370 also share its reaction-network ID.
 - 1,814 failures retain the same heavy-atom bonds after removing hydrogen,
   charge, and radical distinctions. These signatures are diagnostic proxies,
   not proven mechanisms or evidence that every alternative is chemically valid.
@@ -58,7 +114,7 @@ See [full report](results/reranking/failure-study/REPORT.md),
   it does not establish that a stronger reranker will resolve them.
 - Frozen model, configurations, split manifest, and all decisions are preserved
   under `results/reranking/failure-study/`. The 512 reserved future test rows
-  remain unprocessed and disjoint by input, pathway, and connected group.
+  remain unprocessed and disjoint by input, reaction-network ID, and connected group.
 
 The base checkpoint and inference ranking are unchanged. No physical energy
 feature was computed. Full benchmark inference remains paused; the measured
@@ -96,9 +152,9 @@ Fixed selection in `results/reranking/pilot-v2/selection.json`:
 - 512 official training rows in 371 groups, 256 validation rows in 245 groups.
 - 512 untouched, unprocessed test rows in 505 groups. All groups connected to
   the diagnostic prefix, validation set, or sampled training pool are excluded.
-- Components connect canonical whole-reactant identities or source-local pathway
+- Components connect canonical whole-reactant identities or source-local network
   IDs transitively. Sequence indices restart across official splits and are
-  therefore namespaced; generic PM/RS/RC/PC labels are ignored as pathway IDs.
+  therefore namespaced; generic PM/RS/RC/PC labels are ignored as network IDs.
 - Selection uses a fixed hash rule before inspecting outcomes. The old prepared
   runner uses K=5; amend and freeze a K=10 protocol to match the latest request
   before running the untouched cohort. All methods must share candidate sets.

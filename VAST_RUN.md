@@ -32,6 +32,17 @@ not complete reactions or paths from initial reactants.
   The 512 reserved future test rows remain unprocessed. No new GPU inference
   was started for this study, and full benchmark continuation remains paused.
 
+- The subsequent [label/evaluation audit](results/label-audit-20152/REPORT.md)
+  covers every completed step. It distinguishes competing recorded branches
+  from 435 predictions without another observed target for the same input.
+  Numeric IDs identify potentially branching networks, not single trajectories.
+  The larger reranker proposal is on hold while label interpretation is reviewed.
+  No unprocessed test target labels or new GPU inference were used in this audit.
+- The [50-case stratified review](results/stratified-review-50/REPORT.md) is
+  complete (2026-10-29), using local cached cases only. It proposes narrow
+  validity/continuation diagnostics; it does not demonstrate a reranker gain.
+  The preserved full run and reserved evaluation subset were not restarted.
+
 Resume the full benchmark only after credible pilot benefit or a decision to
 obtain the final reproduction result. Restore/verify the saved prefix before
 restarting, use a fresh process-bound monitor, and never use the old migration
