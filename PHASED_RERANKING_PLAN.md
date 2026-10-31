@@ -1,5 +1,7 @@
 # Phased FlowER reranking implementation plan
 
+**2026-10-31 scope amendment:** the next proposed experiment is now the standalone [energy-selection feasibility pilot](ENERGY_FEASIBILITY_PLAN.md), comparing frequency directly with frequency plus energy on matched validation cases. It does not require the nonphysical model below to be trained first. The original phased design remains here as deferred background; the completed Phase 0 output and its frozen protocol are unchanged. The narrower pilot also remains on hold.
+
 ## Phase 1 — additive nonphysical residual model
 
 Implement a fresh scorer with `s_j = log(count_j / 64) + lambda * w^T z_j`. The prior coefficient is one. Keep the original frequency winner unless the best alternative exceeds its score by a **strictly greater** tuned margin. Stable original ordering breaks ties. `lambda=0` is an explicit policy, including when all learned policies are worse. Empty pools retain an empty prediction and count as incorrect; unsupported row features trigger frequency fallback. Candidate states/counts/order are immutable.
