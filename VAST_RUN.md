@@ -1,12 +1,95 @@
 # FlowER test on Vast.ai
 
-## Current state — full inference paused (2026-10-28)
+## Historical operation — targeted pilot (2026-10-29)
+
+**Latest status: pilot complete; A100 rental cancelled.** The earlier approved
+time limit stopped audit inference at 996/1,024. The user then authorized another
+30 minutes. After repairing the expired startup deadline through Vast's
+stopped-container file transfer, audit inference resumed at row 996 and completed
+the remaining 28 inputs. No checkpoint, source, model, cohort or ranking settings
+changed. All earlier prediction prefixes were preserved exactly.
+
+All 1,024 fit, 512 tune and 1,024 audit inputs now have 64 samples each. Thirty
+remote pilot files were checksum-verified locally before shutdown. Instance
+`58220553` was cancelled; Vast's final inventory contained no instances. Frozen
+model assessment and reporting then ran locally. The final running window was
+approximately 3.6 minutes ($0.07); all three A100 pilot running windows total
+approximately $4.15, excluding retained-storage time, transfer charges and earlier
+benchmark rentals. These are lifecycle estimates, not an invoice reconciliation.
+
+On the fixed 1,024-input validation audit, frequency scored 862 (84.18%) and the
+targeted reranker 871 (85.06%): 19 corrections, 10 introduced errors, net +0.879
+percentage points, 95% grouped interval [-0.100, +1.898]. The result is
+**inconclusive** under the frozen criteria. The global ablation had five
+corrections and five harms; the chemistry rule had reverted to frequency during
+tuning. The full benchmark remains paused at 20,152 rows.
+
+See [completed pilot report](results/reranking/targeted-pilot-20261029/REPORT.md),
+[all 38 targeted switches](results/reranking/targeted-pilot-20261029/changed-cases.jsonl),
+and [operating receipt](results/reranking/targeted-pilot-20261029/operating-receipt.json).
+Final supervisor: `.vast/targeted-a100-finalrun-lifecycle.json`; cancellation:
+`.vast/targeted-a100-finalrun-cancelled.json`. Recovery archive:
+`results/reranking/targeted-final-copy2-recovery-20261029/`.
+
+The operational history below describes earlier launches and extensions.
+
+The user authorized an A100 pilot and cancellation of other rentals. The retained
+H100 `58056052` could not restart because host resources were unavailable. No
+pilot inference ran there. All 57 local snapshot files were reverified; the H100
+was then destroyed, and Vast's instance list was verified empty. Its SSH address
+below is historical and must not be used for a current connection.
+
+The replacement launcher `.vast/launch_targeted_a100.py` uses one 80 GB A100,
+with a three-hour wall-clock ceiling, stopping sooner on completion. Its rate
+ceiling is $1.25/hour (at most $3.75), within the original $4.29 pilot estimate.
+The full benchmark remains paused at 20,152 rows.
+
+The fixed pilot cohort is 1,024 train-fit, 512 validation-tune and 1,024 separate
+validation-audit steps, each with 64 samples and K=10. The reserved 512 test rows
+remain unprocessed. Artifacts and protocol:
+`results/reranking/targeted-pilot-20261029/`. Fit/tune inference precedes CPU model
+freezing; audit inference follows it. Local and remote guards enforce the deadline.
+Progress: `.vast/targeted-a100-lifecycle.json`; stop receipt:
+`.vast/targeted-a100-stop-verified.json`. Nothing resumes the full benchmark.
+
+Completed pilot: instance `58220553`, `NVIDIA A100-SXM4-80GB`, $1.194222/hour.
+Remote preflight passed: 28 uploaded files, checkpoint and preserved prediction
+hashes verified, PyTorch 2.4.0, RDKit 2024.3.3, and 78.8 GiB free at preflight.
+The following SSH address is historical; this rental has been cancelled:
+
+```bash
+ssh -p 22127 -i /Users/deveshi/Desktop/Flow-ER/.vast/id_ed25519 root@104.37.174.34
+```
+
+On the instance, monitor:
+
+```bash
+cat /workspace/Flow-ER/results/reranking/targeted-pilot-20261029/inference-progress.json
+tail -f /workspace/Flow-ER/results/reranking/targeted-pilot-20261029/logs/inference-audit-attempt-0001.log
+```
+
+The local backup connection later timed out. Server inference completed all
+1,024 fit rows, then hit a broken output pipe before starting tune. The launcher
+stopped the A100. Recovery verified all 1,024 saved rows (65,536 samples) and the
+unchanged original prediction prefix, then resumed tuning with detached remote
+execution and retries for transient backup failures. Recovery history is under
+`results/reranking/targeted-recovery-20261029/`; active recovery state is
+`.vast/targeted-a100-resume1-lifecycle.json`.
+
+The user approved a further 30 minutes, moving the maximum deadline from
+16:35 to 17:05 IST on 2026-10-29. Maximum 3.5-hour cost at the observed rate is
+about $4.18; stop sooner if complete. The proposal and user approval are recorded
+in `.vast/targeted-deadline-extension-proposal.json` and
+`.vast/targeted-a100-extension1-approval.json`. This changes the operational
+deadline only; cohort membership and evaluation rules remain fixed.
+
+## Preserved full inference — paused on 2026-10-28
 
 At the user's request, full inference is paused at **20,152 elementary-step
 cases**, with **198,845 remaining**. These are individual next-state predictions,
 not complete reactions or paths from initial reactants.
 
-- H100 instance `58056052` is retained but stopped: Vast reports
+- At preservation, H100 instance `58056052` was stopped: Vast reported
   `cur_state=stopped`, `intended_status=stopped`, `actual_status=exited`.
   GPU compute is stopped; retained storage remains chargeable.
 - Both completion monitors were disabled before the pause. No automatic full
@@ -31,7 +114,6 @@ not complete reactions or paths from initial reactants.
 - The exploratory assessment does not qualify as an untouched evaluation.
   The 512 reserved future test rows remain unprocessed. No new GPU inference
   was started for this study, and full benchmark continuation remains paused.
-
 - The subsequent [label/evaluation audit](results/label-audit-20152/REPORT.md)
   covers every completed step. It distinguishes competing recorded branches
   from 435 predictions without another observed target for the same input.

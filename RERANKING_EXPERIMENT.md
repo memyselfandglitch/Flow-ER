@@ -4,8 +4,52 @@
 
 - Origin skill: academic-research-suite / experiment-agent
 - Date: 2026-10-27
-- Stage: label ambiguity audit and 50-case stratified chemical review
-- Status: label audit and stratified review complete; full benchmark preserved and paused
+- Stage: targeted train/validation feasibility pilot after the 50-case review
+- Status: targeted pilot complete and inconclusive; rentals cancelled; full benchmark preserved and paused
+
+## Completed targeted feasibility pilot (2026-10-29)
+
+The user approved a further 30-minute allowance after the earlier deadline left
+28 audit inputs unfinished. Audit-only resume completed all 1,024 inputs while
+preserving the original 996 predictions. All 2,560 pilot inputs have 64 samples;
+checkpoint, frozen model, previous outputs and remote backups were verified.
+The A100 was cancelled before local CPU assessment; no rentals remain.
+
+The fixed validation audit across 682 groups scored frequency 862/1,024 (84.18%),
+global ablation 862/1,024 (five corrections, five harms), and the prespecified
+targeted model 871/1,024 (85.06%; 19 corrections, 10 harms, nine wrong-to-wrong
+switches). The fixed chemistry rule used its tuning-selected frequency fallback.
+Targeted gain was +0.879 percentage points, with a 95% paired group-bootstrap
+interval [-0.100, +1.898]. This is **inconclusive** and fails the prespecified
+positive-pilot criteria. No audit-based refitting or reselection was performed;
+the full benchmark remains paused.
+
+The [completed report](results/reranking/targeted-pilot-20261029/REPORT.md) includes
+all four methods, grouped uncertainty, tuning results separately, and all 38
+primary switches. Of those switches, 34 retain heavy-atom connectivity (17
+corrections, nine harms) and four change it (two corrections, one harm). These
+are descriptive graph comparisons, not validated reaction mechanisms or energies.
+
+The frozen design is in `results/reranking/targeted-pilot-20261029/protocol.md`:
+1,024 official training rows for fitting, 512 validation rows for tuning, and
+1,024 distinct validation rows for audit. Components are separated by canonical
+input/network identity and exclude the inspected test prefix and reserved 512
+test rows. Independent selection review passed all 32 checks, with feasibility
+and power limits documented. Forty-three runner/reranker tests passed before launch.
+
+The protocol generated 64 samples per input and compared selection from the same
+top ten saved candidates: frequency, fixed chemistry rule, learned global features,
+and the prespecified primary learned targeted features. Models were frozen before
+audit generation. Corrections and introduced errors were counted across every
+audit row, with grouped uncertainty. This pilot uses chemistry descriptors without
+physical energy calculations. No full benchmark restart is automatic.
+
+The retained H100 was unavailable and generated no pilot samples. Following user
+authorization, its verified backup was retained locally and its rental cancelled.
+A fresh 80 GB A100 has a three-hour maximum at no more than $1.25/hour, within
+the original $4.29 compute estimate. The pre-generation operational amendment
+preserves the fixed cohort and statistical protocol. An incomplete audit remains
+incomplete rather than being scored as the planned evaluation.
 
 ## Revised scope (2026-10-28)
 
@@ -21,10 +65,10 @@ The user replaced the previous finish-inference-first plan:
    final reproduction result is needed.
 
 Preservation is complete: `results/paused-20261028/` has 57 checksum-verified
-files. The H100 is stopped with its preserved backup verified. The prefix has 20,152 rows,
+files. The H100 was later cancelled after backup reverification. The prefix has 20,152 rows,
 each with 64 samples; 198,845 benchmark rows remain.
 
-**The label audit and stratified review use cached predictions.** In the current inference, top K
+**The label audit preceded the active targeted pilot above.** In the current inference, top K
 means K distinct next-state candidates ranked by sampling frequency for a supplied
 elementary-step input. It is not K consecutive correct steps and not K complete
 pathways rolled out from initial reactants. The failure-learning pilot was followed
