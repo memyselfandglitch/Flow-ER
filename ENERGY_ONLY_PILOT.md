@@ -1,5 +1,31 @@
 # FlowER energy-only pilot
 
+## Frozen V2 execution completed
+
+The user authorized the exact frozen V2 protocol for the same 18 cases. **71 validated jobs were reused byte-for-byte; all 40 remaining jobs were attempted locally with two workers.** Twelve new jobs passed and 28 failed, including successful single-point calculations for all eight monatomic ion jobs. Scoring and aggregation took **163.8 seconds**; cloud spend was **$0**.
+
+Calculation coverage is **4/18 complete pools and 22/62 candidates**. Energy ranking recovered **3/18 references (3/4 complete pools)**, including the one recovered in V1 and two additional recoveries at validation lines 2711 and 20906. One fully scored pool kept the frequency winner; none switched to another strictly incorrect candidate. Fourteen unresolved pools retained the original prediction by fallback. There were no near-ties within 1 kcal/mol and no complete-pool winner changes under the first-conformer sensitivity check.
+
+- [Detailed outcomes, energy gaps and all unresolved-case reasons](results/reranking/energy-only-focus-v2-20261031-run/DETAILED_REPORT.md)
+- [Every candidate structure, energy, original rank/count and provenance](results/reranking/energy-only-focus-v2-20261031-run/cases.html)
+- [Assessment summary](results/reranking/energy-only-focus-v2-20261031-run/assessment-summary.json) and [integrity verification](results/reranking/energy-only-focus-v2-20261031-run/assessment-verification.json)
+- [Authorization receipt](results/reranking/energy-only-focus-v2-20261031-authorization.json) and [execution log](results/reranking/energy-only-focus-v2-20261031-run/run.log)
+
+The original results, candidate pools, counts, rankings and solvent assignments were verified unchanged. No failed calculation energy was accepted and no new failure was retried. DeepMech, training, new FlowER inference, cloud execution and reserved-test access remain held. This failure-only sample cannot establish overall accuracy gain or measure damage to already-correct predictions.
+
+## Historical V2 preparation freeze — execution was held at preparation
+
+The same **18 cases and 62 candidates**, with byte-identical solvent assignments and pools, are prepared under a versioned correction. **71/111** previously successful fragment–solvent jobs passed revalidation and can be reused. All **40** failed jobs remain quarantined: the rerun plan requires **8 atomic single points and 32 two-conformer molecular jobs**, at most 72 new xTB calls. Allow about **8 minutes** on two local workers, with the existing two-hour absolute cap and no cloud spend.
+
+Current validated calculation availability is **10/62 candidates and 1/18 complete pools**. V2 reference recovery has **not** been assessed. Original run files remain unchanged, and no physical calculation was executed during this correction.
+
+- [Frozen correction, geometry diagnosis and exact execution commands](results/reranking/energy-only-focus-v2-20261031/REPORT.md)
+- [Manifest](results/reranking/energy-only-focus-v2-20261031/manifest.json) and [verification receipt](results/reranking/energy-only-focus-v2-20261031-verification.json)
+- [17 focused tests](tests/test_xtb_correction_v2.py)
+- [Separate proposed DeepMech comparison](DEEPMECH_COMPARISON_NOTE.md), with no model installation, training or inference performed
+
+The revised rules retain full structure checks and whole-pool fallback. Monatomic ions use one properly converged single point; H₂ bond recognition is corrected; resonance differences require an explicit indexed equivalence proof. Unresolved reconstruction and changed-connectivity flags remain failures. A new authorization receipt tied to the exact v2 manifest is required before execution.
+
 ## Authorized local focus run — 2026-10-31
 
 The user's request to start the focused energy test authorized the **18 frozen unmatched cases**, with all 62 retained candidate entries and 111 distinct fragment–solvent jobs. Execution is local, with two workers, two prescribed conformers and a two-hour total limit. The other 25 proposed cases, training, new inference, cloud execution and reserved-test access remain held.
