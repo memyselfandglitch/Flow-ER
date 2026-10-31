@@ -1,5 +1,9 @@
 # Grouped reranking analysis after inference
 
+## Combined development extension (2026-10-31)
+
+The user authorized combining the previously inspected 20,152 test-prefix rows with all 21,723 validation rows. The new model uses 41,875 development rows and unchanged saved top-10 pools, with fresh fits and nested cross-validation over 5,520 connected groups. Combined held-out accuracy is 85.490% → 85.746%, with 1,001 corrections and 894 new errors (+107 net; +0.256 percentage points, 95% group-bootstrap interval +0.078 to +0.431). Source-specific results are 85.076% → 85.467% on validation and 85.937% → 86.046% on the inspected prefix. The latter has an interval including zero. These are exploratory development estimates; adding the prefix is not isolated as a causal treatment, and it is no longer an independent test set. The separate reserved 20,000 test outcomes and previous frozen model remain sealed/preserved. Local CPU only; no new generation or cloud spending. [Report](results/reranking/learned-residual-combined-20261031/REPORT.md) · [Frozen model](results/reranking/learned-residual-combined-20261031/model/frozen.json).
+
 ## Previous validation-only experiment (2026-10-31)
 
 The user authorized a fresh learned reranker after the bounded energy pilot. The active implementation is the nonphysical, soft-positive linear frequency-residual model in [the phased plan](PHASED_RERANKING_PLAN.md), with nested connected-group validation, fold-local preprocessing and labels, bounded versus uniform weighting, and zero intervention as a selectable policy. All 21,723 validation pools are complete and preserved. Local validation training and freezing are authorized within two CPU-hours; physical calculations, DeepMech, new FlowER inference, cloud execution and reserved-test outcomes remain held.
