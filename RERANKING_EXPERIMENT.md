@@ -1,5 +1,33 @@
 # Grouped reranking analysis after inference
 
+## Historical follow-up: all validation, random 20k test (2026-10-29)
+
+The user requested a new reranker trained from scratch on the complete official
+validation set, retaining the pretrained FlowER generator. The final scope reuses
+verified existing validation candidates and evaluates a fixed random sample of
+20,000 test steps. Generation resumed on an 80 GB A100 on 2026-10-30 after
+recovering the stopped H100's newer outputs. Startup verification confirmed
+17,001 of 21,723 validation steps saved, including 1,536 reused sets; all earlier
+prediction prefixes are unchanged. The user subsequently requested that reranker
+training be held and the GPU released after current validation generation.
+Training and test evaluation remain pending further instruction. See
+[current run details](results/reranking/full-validation-test20k-20261029/CURRENT_RUN.md)
+and [the run plan](results/reranking/full-validation-test20k-20261029/RUN_PLAN.md).
+
+All 21,723 validation rows are included: 1,536 have reusable candidates and 20,187
+need generation. Test membership was selected using only input/network metadata
+from 198,712 uninspected rows in components disjoint from validation and the old
+diagnostic prefix. All 20,000 selected test rows need new candidates. This subset
+score must not be described as a full official-test score. The earlier draft
+under `full-validation-new-model-20261029/` is superseded and will not be launched.
+
+Five grouped validation folds select hyperparameters, followed by a fresh fit on
+all validation rows. No pilot reranker weights or test labels enter fitting.
+The new implementation retains the 97-feature pairwise logistic architecture;
+changing the generator or adding a deeper reranker is outside this split change.
+Eleven preparation/training/evaluation tests and the 43 existing targeted tests
+passed. The prior model and raw predictions remain unchanged.
+
 ## Material Passport
 
 - Origin skill: academic-research-suite / experiment-agent

@@ -1,5 +1,47 @@
 # FlowER test on Vast.ai
 
+## Validation generation completed (2026-10-31)
+
+All 21,723 validation steps now have 64 saved samples. The artifacts were backed
+up and verified before the GPU rental was released. The reserved 20,000 test
+steps still need separately authorized candidate generation. Subsequent local
+reranker experiments are documented in [RERANKING_EXPERIMENT.md](RERANKING_EXPERIMENT.md).
+The rental addresses and launch instructions below are historical.
+
+## Historical follow-up — resumed full validation / 20k test (2026-10-30)
+
+Prepared experiment: `results/reranking/full-validation-test20k-20261029/`.
+Reuse 1,536 validation candidate sets; generate the remaining 20,187 validation
+steps and a fixed random 20,000-step test sample. Keep the pretrained FlowER
+checkpoint frozen and fit a separate new reranker using validation only.
+
+Generation resumed using the existing API key on A100 SXM4 80 GB instance
+`58373066`, at $1.003333/hour. Recovery preserved 16,958 validation candidate
+sets, including the 1,536 cached sets. Startup verification confirmed 17,001
+saved validation steps, unchanged old prediction prefixes, and new 64-sample
+outputs. The old H100 `58284758` was cancelled after recovery verification;
+only the replacement A100 remains.
+
+The active lifecycle is `.vast/resume_full_validation_h100.py`; state and logs
+use the `full-validation-test20k-resume1` prefix. The original $75 spending
+ceiling remains, with a conservative prior-cost allowance and an independent
+stop deadline of **2026-10-31 14:48:50 IST**, or earlier on completion/failure.
+The user subsequently requested **no reranker training and release after current
+validation generation**. The original supervisor was disabled before training.
+`scripts/finish_validation_generation_only.py` now waits for the existing
+validation process to finish, then verifies the generated records.
+`.vast/release_after_validation.py` waits on a completion notification over one
+persistent SSH connection, copies and verifies all artifacts, and cancels the
+rental. Reranker training and the fixed test generation are held.
+
+```bash
+ssh -p 14188 -i /Users/deveshi/Desktop/Flow-ER/.vast/id_ed25519 root@82.66.51.122
+```
+
+See [current run details](results/reranking/full-validation-test20k-20261029/CURRENT_RUN.md)
+for logs and [the run plan](results/reranking/full-validation-test20k-20261029/RUN_PLAN.md)
+for the frozen experiment. Commands below describe historical rentals.
+
 ## Historical operation — targeted pilot (2026-10-29)
 
 **Latest status: pilot complete; A100 rental cancelled.** The earlier approved
