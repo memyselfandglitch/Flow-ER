@@ -1,5 +1,20 @@
 # Phased FlowER reranking implementation plan
 
+**Previous validation-only execution, 2026-10-31:** the authorized fresh nonphysical linear frequency-residual experiment is complete and its all-validation model is frozen. All 21,723 official-validation rows were accounted for; 21,631 supplied an eligible soft-positive fitting loss. Local preparation and training consumed 417.9 CPU-seconds, within the two-CPU-hour cap. The new implementation is `scripts/train_learned_residual.py`; the legacy pairwise trainer was not used. DeepMech, physical calculations, new FlowER inference, cloud execution and reserved-test outcomes remain held. Existing predictions, checkpoint, earlier pilots and fixed test membership stay preserved.
+
+Validation-only artifacts: [learned residual validation experiment](results/reranking/learned-residual-validation-20261031/). Sixteen new fit-level tests and 22 existing phase-contract tests passed before execution. The detailed protocol below and older scope amendments are retained as history; that authorization applied only to local nonphysical validation training and model freezing.
+
+[Development report](results/reranking/learned-residual-validation-20261031/REPORT.md): nested grouped accuracy 85.076% → 85.269%, 691 corrections and 649 new errors, paired gain +0.193 points (95% group-bootstrap interval −0.076 to +0.458). This does not establish a positive effect or meet the provisional one-point goal. [Interpretation and verification](results/reranking/learned-residual-validation-20261031/DEVELOPMENT_REVIEW.md) separates this development result from the still-pending reserved test. All 206 fits converged from zero initialization; all 21,723 saved out-of-fold decisions reproduced after checkpoint reload.
+
+```bash
+.venv-analysis/bin/python -m unittest discover -s tests -p test_learned_residual.py
+.venv-analysis/bin/python -m unittest discover -s tests -p test_phased_reranking.py
+.venv-analysis/bin/python scripts/train_learned_residual.py prepare --out results/reranking/learned-residual-validation-20261031
+.venv-analysis/bin/python scripts/train_learned_residual.py train --out results/reranking/learned-residual-validation-20261031
+```
+
+Preparation requires a fresh directory. If interrupted before completion, the training command supports `--resume` with verified fit checkpoints and the remaining cumulative CPU budget. A frozen model cannot be refitted in place. The fixed 20,000 test rows still need separately authorized candidate generation before final evaluation.
+
 **2026-10-31 scope amendment:** the next proposed experiment is now the standalone [energy-selection feasibility pilot](ENERGY_FEASIBILITY_PLAN.md), comparing frequency directly with frequency plus energy on matched validation cases. It does not require the nonphysical model below to be trained first. The original phased design remains here as deferred background; the completed Phase 0 output and its frozen protocol are unchanged. The narrower pilot also remains on hold.
 
 ## Phase 1 — additive nonphysical residual model

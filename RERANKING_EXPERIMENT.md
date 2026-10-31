@@ -1,5 +1,13 @@
 # Grouped reranking analysis after inference
 
+## Previous validation-only experiment (2026-10-31)
+
+The user authorized a fresh learned reranker after the bounded energy pilot. The active implementation is the nonphysical, soft-positive linear frequency-residual model in [the phased plan](PHASED_RERANKING_PLAN.md), with nested connected-group validation, fold-local preprocessing and labels, bounded versus uniform weighting, and zero intervention as a selectable policy. All 21,723 validation pools are complete and preserved. Local validation training and freezing are authorized within two CPU-hours; physical calculations, DeepMech, new FlowER inference, cloud execution and reserved-test outcomes remain held.
+
+Artifacts: [new validation experiment](results/reranking/learned-residual-validation-20261031/). The historical 97-feature pairwise proposal below is superseded for this run. No earlier model weights are reused. The fixed random 20,000 test steps remain reserved; their candidate generation is pending separate authorization.
+
+**Completed:** all 206 fresh fits converged, and the final model is frozen. Nested grouped validation accuracy changed from 85.076% to 85.269% (+0.193 percentage points; 95% interval −0.076 to +0.458), with 691 corrections, 649 new errors and 369 wrong-to-wrong switches. This is development evidence and does not establish the provisional one-point improvement. See the [report](results/reranking/learned-residual-validation-20261031/REPORT.md) and [review](results/reranking/learned-residual-validation-20261031/DEVELOPMENT_REVIEW.md). No GPU or cloud spending was used for this experiment.
+
 ## Historical follow-up: all validation, random 20k test (2026-10-29)
 
 The user requested a new reranker trained from scratch on the complete official
